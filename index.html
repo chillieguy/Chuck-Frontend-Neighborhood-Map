@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Neighborhood Explorer</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">    
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="container">
+    <div id="map-canvas"></div>
+      <h1>Chuck Underwood: Bend Beer Tour</h1>
+      <div class="search-list-box">
+      <input class="filter-box" placeholder="Filter results by: Name" type="search" data-bind="value: filter, valueUpdate:'keyup'" />
+      <ul data-bind="foreach: filterList()" class="list-view">
+        <li data-bind="text: name , click: $parent.showInfoWindow"></li>
+      </ul>
+      </div>
+    </div>
+
+    
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/knockout.js"></script>
+    <script src="js/bootstrap.js"></script>  
+    <script src="js/app.js"></script>
+  </body>
+</html>
