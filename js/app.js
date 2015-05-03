@@ -3,6 +3,7 @@ var map;
 var marker;
 var center;
 var breweryList;
+var offset;
 
 var mapPin = [];
   
@@ -102,7 +103,8 @@ var initMap = function(){
 
   google.maps.event.addListener(marker, 'click', (function(marker)  {
     return function() {
-      map.panTo(marker.getPosition());
+      center = marker.getPosition();
+      map.panTo(center);
       map.setZoom(16);
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){ marker.setAnimation(null); }, 1500);
@@ -111,6 +113,9 @@ var initMap = function(){
       getFourSquare(marker);
     }
   })(marker));
+  google.maps.event.addDomListener(window, "resize", function() {
+    map.setCenter(center); 
+  });
   mapPin.push(marker);
   };
 }
@@ -127,7 +132,8 @@ var ViewModel = function(){
 
   self.showInfoWindow= function(breweryList){
     var point= mapPin[breweryList.markerNum];
-    map.panTo(point.getPosition());
+    center = point.getPosition();
+    map.panTo(center);
     map.setZoom(16);
     infowindow.open(map, point);
     infowindow.setContent(point.title+"<div id='content'></div>");

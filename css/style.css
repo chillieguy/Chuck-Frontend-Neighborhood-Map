@@ -59,7 +59,7 @@ li {
  	top: 10px; 
  	left: 10px;
  	z-index: 99;
- 	width: 300px; 
+ 	width: 25%; 
  	height: 25px;
  	font-size: 16px; 
  	margin-bottom: 5px;
@@ -75,6 +75,8 @@ li {
 	left: 10px;
 	margin-top: 10px;
 	opacity: .75;
+	width: 20%;
+	min-width: 10%
 }
 
 .btn-list {
