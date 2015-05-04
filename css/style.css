@@ -29,6 +29,16 @@ h1{
 	margin: 0px;
 }
 
+@media (max-width: 500px)  {
+	h1 {
+		display: none;
+	}
+
+	#content {
+		width: 50%;
+	}
+}
+
 ul {
 	 list-style-type: none;
 	 width: 300px;
