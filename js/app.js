@@ -14,7 +14,6 @@ var mapPin = [];
 
 // List of Breweris in Bend, OR
 // gID not used in current interation
-// To Do - Move into seperate file or pull breweries based on map center  
 var breweryList = [
     {
         name: 'Deschutes Brewery',
@@ -94,7 +93,7 @@ var breweryList = [
  * Set up Google maps and infowindow
  * Handle clicking on pin to center pin and display infowindow
  */
-var initMap = function(){
+ var initMap = function(){
   // Map options, centered on Bend, OR
   center = new google.maps.LatLng(44.05, -121.3);
   var mapOptions = {
@@ -108,6 +107,7 @@ var initMap = function(){
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
   
   infowindow = new google.maps.InfoWindow();
+
   for (var i = 0; i < breweryList.length; i++) {
     marker = new google.maps.Marker({
       position: new google.maps.LatLng(breweryList[i].lat, breweryList[i].lon),
@@ -115,33 +115,32 @@ var initMap = function(){
       title: breweryList[i].name
     }); 
 
-  // Zoom and center selected pin then move by offset 
-  google.maps.event.addListener(marker, 'click', (function(marker)  {
-    return function() {
-      center = marker.getPosition();
-      map.panTo(center);
-      map.setZoom(16);
-      map.panBy(lonOffset,latOffset);
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      // Bounce twice and then stop
-      setTimeout(function(){ marker.setAnimation(null); }, 1500);
-      // Add div for infowindow to make it easier to append information 
-      infowindow.setContent(marker.title+"<div id='content'></div>");
-      infowindow.open(map, marker);
-      // Get info for selected pin from Foursquare
-      // TODO: Pull info on load and not each time pin is selected
-      getFourSquare(marker);
-    };
-  })(marker));
+    // Zoom and center selected pin then move by offset 
+    google.maps.event.addListener(marker, 'click', (function(marker)  {
+      return function() {
+        center = marker.getPosition();
+        map.panTo(center);
+        map.setZoom(16);
+        map.panBy(lonOffset,latOffset);
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        // Bounce twice and then stop
+        setTimeout(function(){ marker.setAnimation(null); }, 1500);
+        // Add div for infowindow to make it easier to append information 
+        infowindow.setContent(marker.title+"<div id='content'></div>");
+        infowindow.open(map, marker);
+        // Get info for selected pin from Foursquare
+        getFourSquare(marker);
+      };
+    })(marker));
   
-  // Keep map center when resizing the window
-  google.maps.event.addDomListener(window, "resize", function() {
-    map.setCenter(center);
-    map.panBy(lonOffset,latOffset); 
-  });
+    // Keep map center when resizing the window
+    google.maps.event.addDomListener(window, "resize", function() {
+      map.setCenter(center);
+      map.panBy(lonOffset,latOffset); 
+    });
   
-  // Add pins to mapPin array to make easy to access
-  mapPin.push(marker);
+    // Add pins to mapPin array to make easy to access
+    mapPin.push(marker);
   }
 };
 
@@ -173,7 +172,6 @@ var ViewModel = function(){
     // Bounce twice and then stop
     setTimeout(function(){ point.setAnimation(null); }, 1500);
     // Get info for selected listitem from Foursquare
-    // TODO: Pull info on load and not each time listitem is selected
     getFourSquare(point); 
   };
   
@@ -239,6 +237,7 @@ var getFourSquare = function(marker){
     var venueUrl = venue.url;
     
     // Append foursquare info to infowindow
+    // Left in js file till I decide if I want to keep Foursquare
     $windowContent.append('<p>Phone: ' + venueLoc + '</p>');
     $windowContent.append('<p>Twitter: @'+ venueTwitter + '</p>');
     $windowContent.append('<p>Website: '+ venueUrl + '</p>');
