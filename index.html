@@ -9,13 +9,13 @@
   </head>
   <body>
     <div class="container">
-    <div id="map-canvas"></div>
+      <div id="map-canvas"></div>
       <h1>Chuck Underwood: Bend Beer Tour</h1>
       <div class="search-list-box">
-      <input class="filter-box" placeholder="Filter results by: Name" type="search" data-bind="value: filter, valueUpdate:'keyup'" />
-      <ul data-bind="foreach: filterList()" class="list-view">
-        <li data-bind="text: name , click: $parent.showInfoWindow"></li>
-      </ul>
+        <input class="filter-box" placeholder="Filter results by: Name" type="search"  data-bind="value: filter, valueUpdate:'keyup'" />
+        <ul data-bind="foreach: filterList()" class="list-view">
+          <li data-bind="text: name , click: $parent.showInfoWindow"></li>
+        </ul>
       </div>
     </div>
 

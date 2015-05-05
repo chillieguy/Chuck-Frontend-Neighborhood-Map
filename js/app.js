@@ -1,3 +1,6 @@
+"use strict";
+
+// Global variables -  Review to see what can be eliminated or moved into a function
 var infowindow;
 var map;
 var marker;
@@ -6,9 +9,13 @@ var breweryList;
 var latOffset;
 var lonOffset;
 
+// Used to store pins on map
 var mapPin = [];
-  
-var breweryList =[
+
+// List of Breweris in Bend, OR
+// gID not used in current interation
+// To Do - Move into seperate file or pull breweries based on map center  
+var breweryList = [
     {
         name: 'Deschutes Brewery',
         lat:44.047044, 
@@ -83,7 +90,12 @@ var breweryList =[
     },
 ];
 
+/*
+ * Set up Google maps and infowindow
+ * Handle clicking on pin to center pin and display infowindow
+ */
 var initMap = function(){
+  // Map options, centered on Bend, OR
   center = new google.maps.LatLng(44.05, -121.3);
   var mapOptions = {
     zoom: 14,
@@ -92,8 +104,9 @@ var initMap = function(){
     scaleControl: false,
     zoomControl: false
   };
+  // Assign Google Map to map for easy reference
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
+  
   infowindow = new google.maps.InfoWindow();
   for (var i = 0; i < breweryList.length; i++) {
     marker = new google.maps.Marker({
@@ -102,6 +115,7 @@ var initMap = function(){
       title: breweryList[i].name
     }); 
 
+  // Zoom and center selected pin then move by offset 
   google.maps.event.addListener(marker, 'click', (function(marker)  {
     return function() {
       center = marker.getPosition();
@@ -109,77 +123,101 @@ var initMap = function(){
       map.setZoom(16);
       map.panBy(lonOffset,latOffset);
       marker.setAnimation(google.maps.Animation.BOUNCE);
+      // Bounce twice and then stop
       setTimeout(function(){ marker.setAnimation(null); }, 1500);
+      // Add div for infowindow to make it easier to append information 
       infowindow.setContent(marker.title+"<div id='content'></div>");
       infowindow.open(map, marker);
+      // Get info for selected pin from Foursquare
+      // TODO: Pull info on load and not each time pin is selected
       getFourSquare(marker);
-    }
+    };
   })(marker));
+  
+  // Keep map center when resizing the window
   google.maps.event.addDomListener(window, "resize", function() {
     map.setCenter(center);
     map.panBy(lonOffset,latOffset); 
   });
+  
+  // Add pins to mapPin array to make easy to access
   mapPin.push(marker);
-  };
-}
+  }
+};
 
+/*
+ * This is where the voodoo happens, Create a ViewModel to handle the app logic
+ */
 var ViewModel = function(){
   var self = this;
+
+  // Load Google Maps based on options set in initMap
+  google.maps.event.addDomListener(window, 'load', initMap);
   
   self.breweryList = ko.observableArray(breweryList);
   self.mapPin = ko.observableArray(mapPin);
   self.filter = ko.observable('');
   self.shouldShowListings = ko.observable(false),
   
-  
-
+  // When list is selected zoom to pin, center by offset and display infowindow
   self.showInfoWindow= function(breweryList){
     var point= mapPin[breweryList.markerNum];
     center = point.getPosition();
-    console.log(center);
     map.panTo(center);
     map.setZoom(16);
     map.panBy(lonOffset,latOffset);
     infowindow.open(map, point);
+    // Add div for infowindow to make it easier to append information 
     infowindow.setContent(point.title+"<div id='content'></div>");
     point.setAnimation(google.maps.Animation.BOUNCE);
+    // Bounce twice and then stop
     setTimeout(function(){ point.setAnimation(null); }, 1500);
+    // Get info for selected listitem from Foursquare
+    // TODO: Pull info on load and not each time listitem is selected
     getFourSquare(point); 
-  }
+  };
   
+  // Update what Google map pins to display
   self.filterMarkers= function(state){
     for (var i = 0; i < mapPin.length; i++) {
       mapPin[i].setMap(state);
-    };
-  }
+    }
+  };
   
+
   self.filterArray = function(filter){
     return ko.utils.arrayFilter(self.breweryList(), function(location) {
       return location.name.toLowerCase().indexOf(filter) >= 0;   
     });
-  }
+  };
   
+  // Display only breweries that match text in search box
   self.displaySelected = function(filteredmarkers){
     for (var i = 0; i < filteredmarkers.length; i++) {
       mapPin[filteredmarkers[i].markerNum].setMap(map);
     }
-  }
+  };
   
+  // Update listview to display breweriesf
   self.filterList = function(){
     var filter = self.filter().toLowerCase();
+    // If not filter display all breweries
     if (!filter) {
       self.filterMarkers(map);
       return self.breweryList();
     } else {
+    // If filter display only breweries that match search string
     self.filterMarkers(null);
     var filteredmarkers = [];
     filteredmarkers = self.filterArray(filter);
     self.displaySelected(filteredmarkers);
     return filteredmarkers;
     }
-  }
-}
+  };
+};
 
+// Pull information from Foursquare when listview or pin is selected
+// Using pin information to populate infowindow
 var getFourSquare = function(marker){
   var CLIENT_ID = '5E3QB5JQZL0UPAWZBUP35GCEJR1NMIJNPP2UVCP5C4XVQBMO';
   var CLIENT_SECRET = 'IHVGS4A0J1APCNUUT1L0CFMRDHO0NIXKMCZMU5QBXAD1MJ1R';
@@ -193,24 +231,27 @@ var getFourSquare = function(marker){
             '&ll=' + lat + ',' + lon + 
             '&query=\'' + marker.title + '\'&limit=1';
 
+  // Pull foursquare info from marker passed to getFourSquare function
   $.getJSON(url, function(response){
     var venue = response.response.venues[0];
-    console.log(venue);
     var venueLoc = venue.contact.formattedPhone;
     var venueTwitter = venue.contact.twitter;
     var venueUrl = venue.url;
     
+    // Append foursquare info to infowindow
     $windowContent.append('<p>Phone: ' + venueLoc + '</p>');
     $windowContent.append('<p>Twitter: @'+ venueTwitter + '</p>');
     $windowContent.append('<p>Website: '+ venueUrl + '</p>');
    })
+  // Small warning if not able to pull info
   .error(function(e){
     $windowContent.text('FOURSQUARE info could not be fetched');
   });
-}
+};
 
-google.maps.event.addDomListener(window, 'load', initMap);
+// Init the ViewModel and get the Knockout party started
 ko.applyBindings(new ViewModel());
 
+// Used by panBy() to move selected pin down and to the right
 latOffset = window.screen.height * -0.2;
 lonOffset = window.screen.width * -0.1;
