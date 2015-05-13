@@ -253,4 +253,4 @@ ko.applyBindings(new ViewModel());
 
 // Used by panBy() to move selected pin down and to the right
 latOffset = window.screen.height * -0.2;
-lonOffset = window.screen.width * -0.1;
+lonOffset = window.screen.width * -0.15;
